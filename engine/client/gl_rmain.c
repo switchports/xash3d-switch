@@ -23,6 +23,9 @@ GNU General Public License for more details.
 #include "beamdef.h"
 #include "particledef.h"
 #include "entity_types.h"
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
 
 #define IsLiquidContents( cnt )	( cnt == CONTENTS_WATER || cnt == CONTENTS_SLIME || cnt == CONTENTS_LAVA )
 
@@ -861,12 +864,20 @@ static void R_SetupGL( void )
 		y = floor( glState.height - RI.viewport[1] * glState.height / glState.height );
 		y2 = ceil( glState.height - ( RI.viewport[1] + RI.viewport[3] ) * glState.height / glState.height );
 
+#ifdef __SWITCH__
+		pglViewport( x, (1080 - glState.height ) + y2, x2 - x, y - y2 );
+#else
 		pglViewport( x, y2, x2 - x, y - y2 );
+#endif
 	}
 	else
 	{
 		// envpass, mirrorpass
+#ifdef __SWITCH__
+		pglViewport( RI.viewport[0], (1080 - glState.height ) + RI.viewport[1], RI.viewport[2], RI.viewport[3] );
+#else
 		pglViewport( RI.viewport[0], RI.viewport[1], RI.viewport[2], RI.viewport[3] );
+#endif
 	}
 
 	pglMatrixMode( GL_PROJECTION );
@@ -1231,6 +1242,11 @@ R_BeginFrame
 */
 void R_BeginFrame( qboolean clearScene )
 {
+#ifdef __SWITCH__
+	if(!appletMainLoop())
+    	return;
+	Switch_CheckResolution();
+#endif
 	glConfig.softwareGammaUpdate = false;	// in case of possible fails
 
 	if(( gl_clear->integer || gl_overview->integer ) && clearScene && cls.state != ca_cinematic )
@@ -1338,7 +1354,10 @@ void R_EndFrame( void )
 	else
 		R_Set2DMode( false );
 
-#ifdef XASH_SDL
+#ifdef __SWITCH__
+	#include "platform/switch/vid_switch.h"
+	Switch_SwapBuffers();
+#elif defined XASH_SDL
 	SDL_GL_SwapWindow( host.hWnd );
 #elif defined __ANDROID__ // For direct android backend
 	Android_SwapBuffers();

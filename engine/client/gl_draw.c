@@ -249,7 +249,11 @@ void R_Set2DMode( qboolean enable )
 			return;
 
 		// set 2D virtual screen size
+#ifdef __SWITCH__
+		pglViewport( 0, 1080 - glState.height, glState.width, glState.height );
+#else
 		pglViewport( 0, 0, glState.width, glState.height );
+#endif
 		pglMatrixMode( GL_PROJECTION );
 		pglLoadIdentity();
 		pglOrtho( 0, glState.width, glState.height, 0, -99999, 99999 );

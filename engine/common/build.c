@@ -54,7 +54,7 @@ int Q_buildnum( void )
 
 	return b;
 #else
-	return 1276; // Aug 28 2018
+	return 1096; // Aug 13 2016
 #endif
 }
 
@@ -77,8 +77,6 @@ const char *Q_buildos( void )
 	osname = "Android";
 #elif defined(__SAILFISH__)
 	osname = "SailfishOS";
-#elif defined(__HAIKU__)
-	osname = "HaikuOS";
 #elif defined(__linux__)
 	osname = "Linux";
 #elif defined(__APPLE__)
@@ -91,6 +89,8 @@ const char *Q_buildos( void )
 	osname = "OpenBSD";
 #elif defined __EMSCRIPTEN__
 	osname = "emscripten";
+#elif defined __SWITCH__
+	osname = "Switch (LIBNX)";
 #else
 #error "Place your operating system name here! If this is a mistake, try to fix conditions above and report a bug"
 #endif
@@ -154,7 +154,7 @@ const char *Q_buildcommit( void )
 =============
 Q_buildnum_compat
 
-Returns a Xash3D build number. This is left for compatibility with original Xash3D.
+Returns a Xash3D build number. This is left for compability with original Xash3D.
 IMPORTANT: this value must be changed ONLY after updating to newer Xash3D
 IMPORTANT: this value must be acquired through "build" cvar.
 =============

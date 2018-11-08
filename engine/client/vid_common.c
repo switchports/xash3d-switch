@@ -146,7 +146,7 @@ OpenGL funcs
 
 ==============================================
 */
-#ifndef XASH_GL_STATIC
+#if !defined(XASH_GL_STATIC) && !defined(__SWITCH__)
 // helper opengl functions
 GLenum ( APIENTRY *pglGetError )(void);
 const GLubyte * ( APIENTRY *pglGetString )(GLenum name);

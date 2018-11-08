@@ -195,6 +195,7 @@ void GL_SelectTexture( GLint tmu )
 		return;
 
 	glState.activeTMU = tmu;
+#ifndef __SWITCH__
 #ifndef XASH_NANOGL
 	if( pglActiveTextureARB )
 #endif
@@ -209,6 +210,7 @@ void GL_SelectTexture( GLint tmu )
 	{
 		pglSelectTextureSGIS( tmu + GL_TEXTURE0_SGIS );
 	}
+#endif
 #endif
 }
 
@@ -258,18 +260,7 @@ GL_MultiTexCoord2f
 */
 void GL_MultiTexCoord2f( GLenum texture, GLfloat s, GLfloat t )
 {
-#ifndef XASH_NANOGL
-	if( pglMultiTexCoord2f )
-#endif
-	{
-		pglMultiTexCoord2f( texture + GL_TEXTURE0_ARB, s, t );
-	}
-#ifndef XASH_NANOGL
-	else if( pglMTexCoord2fSGIS )
-	{
-		pglMTexCoord2fSGIS( texture + GL_TEXTURE0_SGIS, s, t );
-	}
-#endif
+	pglMultiTexCoord2f( texture + GL_TEXTURE0_ARB, s, t );
 }
 
 /*

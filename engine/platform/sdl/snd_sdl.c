@@ -81,7 +81,12 @@ qboolean SNDDMA_Init( void *hInst )
 	Q_memset( &desired, 0, sizeof( desired ) );
 	desired.freq     = SOUND_DMA_SPEED;
 	desired.format   = AUDIO_S16LSB;
+#ifdef __SWITCH__
+	// The switch seems to have issues to keep up otherwise
+	desired.samples  = 2048;
+#else
 	desired.samples  = 1024;
+#endif
 	desired.channels = 2;
 	desired.callback = SDL_SoundCallback;
 

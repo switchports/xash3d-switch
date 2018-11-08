@@ -3058,7 +3058,7 @@ void SV_SetStringArrayMode( qboolean dynamic )
 }
 
 #ifdef XASH_64BIT
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__SWITCH__)
 #define USE_MMAP
 #include <sys/mman.h>
 #endif
@@ -3158,9 +3158,11 @@ void SV_FreeStringPool( void )
 #ifdef XASH_64BIT
 	MsgDev( D_NOTE, "SV_FreeStringPool()\n" );
 
+	#ifndef __SWITCH__
 	if( str64.pstringarray != str64.staticstringarray )
 		munmap( str64.pstringarray, (str64.maxstringarray * 2) & ~(sysconf( _SC_PAGESIZE ) - 1) );
 	else
+	#endif
 		Mem_Free( str64.staticstringarray );
 #else
 	Mem_FreePool( &svgame.stringspool );

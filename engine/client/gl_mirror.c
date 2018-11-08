@@ -297,6 +297,7 @@ void R_DrawMirrors( void )
 			r_viewleaf = Mod_PointInLeaf( oldRI.pvsorigin, cl.worldmodel->nodes );
 			r_viewleaf2 = Mod_PointInLeaf( RI.pvsorigin, cl.worldmodel->nodes );
 
+			#ifndef __SWITCH__
 			if( GL_Support( GL_ARB_TEXTURE_NPOT_EXT ))
 			{
 				// allow screen size
@@ -305,11 +306,14 @@ void R_DrawMirrors( void )
 			}
 			else
 			{
+			#endif
 				RI.viewport[2] = NearestPOW( RI.viewport[2], true );
 				RI.viewport[3] = NearestPOW( RI.viewport[3], true );
 				RI.viewport[2] = bound( 128, RI.viewport[2], 1024 );
 				RI.viewport[3] = bound( 64, RI.viewport[3], 512 );
+			#ifndef __SWITCH__
 			}
+			#endif
 
 			tr.framecount++;
 			R_RenderScene( &RI.refdef );

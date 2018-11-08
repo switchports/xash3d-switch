@@ -28,7 +28,9 @@ GNU General Public License for more details.
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+#ifndef __SWITCH__
 #include <dlfcn.h>
+#endif
 #ifndef __ANDROID__
 extern char **environ;
 #include <pwd.h>
@@ -298,7 +300,7 @@ char *Sys_GetCurrentUser( void )
 	if( GetUserName( s_userName, &size ))
 		return s_userName;
 
-#elif !defined(__ANDROID__)
+#elif !defined(__ANDROID__) && !defined(__SWITCH__)
 
 	uid_t uid = geteuid();
 	struct passwd *pw = getpwuid( uid );
@@ -310,7 +312,7 @@ char *Sys_GetCurrentUser( void )
 	return "Player";
 }
 
-#if (defined(__linux__) && !defined(__ANDROID__)) || defined (__FreeBSD__) || defined (__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__HAIKU__)
+#if (defined(__linux__) && !defined(__ANDROID__)) || defined (__FreeBSD__) || defined (__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 qboolean Sys_FindExecutable( const char *baseName, char *buf, size_t size )
 {
 	char *envPath;
@@ -396,19 +398,6 @@ void Sys_ShellExecute( const char *path, const char *parms, qboolean shouldExit 
 	else MsgDev( D_WARN, "Could not find "OPEN_COMMAND" utility\n" );
 #elif defined(__ANDROID__) && !defined(XASH_DEDICATED)
 	Android_ShellExecute( path, parms );
-#elif defined(__HAIKU__)
-	// Prevent "open: www.url.com: No such file or directory" error
-	char http[MAX_SYSPATH];
-	if( Q_strncmp( path, "http", 4 ) )
-	{
-		Q_snprintf( http, MAX_SYSPATH, "%s%s", "http://", path );
-		path = http;
-	}
-
-	// This will work in both package and standalone versions
-	char command[MAX_SYSPATH];
-	Q_snprintf( command, MAX_SYSPATH, "%s %s &", OPEN_COMMAND, path );
-	system( command );
 #endif
 
 	if( shouldExit )
@@ -673,7 +662,7 @@ before call this
 void Sys_Error( const char *format, ... )
 {
 	va_list	argptr;
-	char text[4096];
+	char	text[MAX_SYSPATH];
 
 	DEBUG_BREAK;
 

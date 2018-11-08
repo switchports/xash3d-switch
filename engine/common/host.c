@@ -48,6 +48,21 @@ GNU General Public License for more details.
 #include "platform/sdl/events.h"
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+
+static AppletHookCookie applet_hook_cookie;
+
+static void on_applet_hook(AppletHookType hook, void* param) {
+   if(hook == AppletHookType_OnExitRequest) {
+      printf("Got AppletHook OnExitRequest, exiting.\n");
+      Sys_Quit();
+   }
+}
+
+static int s_nxlinkSock = -1;
+#endif
+
 typedef void (*pfnChangeGame)( const char *progname );
 
 pfnChangeGame	pChangeGame = NULL;
@@ -85,7 +100,7 @@ void Sys_PrintUsage( void )
 		#endif
 	#endif
 	" [options] [+command1] [+command2 arg]\n"
-	"Available options:\n"
+	"Availiable options:\n"
 	O("-dev <level>     ","set developer level")
 	O("-log             ","write log to \"engine.log\"")
 	O("-toconsole       ","start witn console open")
@@ -1053,6 +1068,8 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 		Q_strncpy( host.rootdir, IOS_GetDocsDir(), sizeof( host.rootdir ));
 #elif defined(__SAILFISH__)
 		Q_strncpy( host.rootdir, GAMEPATH, sizeof( host.rootdir ));
+#elif defined(__SWITCH__)
+	Q_strncpy( host.rootdir, "sdmc:/xash3d", sizeof( host.rootdir ));
 #elif defined(XASH_SDL)
 		if( !( baseDir = SDL_GetBasePath() ) )
 			Sys_Error( "couldn't determine current directory: %s", SDL_GetError() );
@@ -1237,6 +1254,23 @@ Host_Main
 */
 int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bChangeGame, pfnChangeGame func )
 {
+#ifdef __SWITCH__
+	appletLockExit();
+	appletHook(&applet_hook_cookie, on_applet_hook, NULL);
+	socketInitializeDefault();
+	s_nxlinkSock = nxlinkStdio();
+	if (s_nxlinkSock == -1) {
+		socketExit();
+	}
+
+	extern int switch_installdll_mainui( void );
+	switch_installdll_mainui();
+	extern int switch_installdll_client( void );
+	switch_installdll_client();
+	extern int switch_installdll_server( void );
+	switch_installdll_server();
+#endif
+
 	pChangeGame = func;	// may be NULL
 
 	host.change_game = bChangeGame;
@@ -1262,8 +1296,8 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	host_limitlocal = Cvar_Get( "host_limitlocal", "0", 0, "apply cl_cmdrate and rate to loopback connection" );
 	con_gamemaps = Cvar_Get( "con_mapfilter", "1", CVAR_ARCHIVE, "when enabled, show only maps in game folder (no maps from base folder when running mod)" );
 	download_types = Cvar_Get( "download_types", "msec", CVAR_ARCHIVE, "list of types to download: Model, Sounds, Events, Custom" );
-	build = Cvar_Get( "build", va( "%i", Q_buildnum_compat()), CVAR_INIT, "returns an original xash3d build number. left for compatibility" );
-	ver = Cvar_Get( "ver", va( "%i/%g.%i", PROTOCOL_VERSION, BASED_VERSION, Q_buildnum_compat( ) ), CVAR_INIT, "shows an engine version. left for compatibility" );
+	build = Cvar_Get( "build", va( "%i", Q_buildnum_compat()), CVAR_INIT, "returns an original xash3d build number. left for compability" );
+	ver = Cvar_Get( "ver", va( "%i/%g.%i", PROTOCOL_VERSION, BASED_VERSION, Q_buildnum_compat( ) ), CVAR_INIT, "shows an engine version. left for compabiltiy" );
 	host_build = Cvar_Get( "host_build", va("%i", Q_buildnum() ), CVAR_INIT, "returns current build number" );
 	host_ver = Cvar_Get( "host_ver", va("%i %s %s %s %s", Q_buildnum(), XASH_VERSION, Q_buildos(), Q_buildarch(), Q_buildcommit() ), CVAR_INIT, "detailed info about this build" );
 	host_mapdesign_fatal = Cvar_Get( "host_mapdesign_fatal", "1", CVAR_ARCHIVE, "make map design errors fatal" );
@@ -1450,5 +1484,14 @@ void EXPORT Host_Shutdown( void )
 	Sys_DestroyConsole();
 	Sys_CloseLog();
 	Sys_RestoreCrashHandler();
-
+	
+	#ifdef __SWITCH__
+    if (s_nxlinkSock >= 0)
+    {
+        close(s_nxlinkSock);
+        socketExit();
+        s_nxlinkSock = -1;
+	}
+	appletUnlockExit();
+	#endif
 }

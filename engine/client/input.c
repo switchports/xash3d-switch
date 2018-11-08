@@ -913,6 +913,11 @@ void Host_InputFrame( void )
 #ifdef USE_EVDEV
 	IN_EvdevFrame();
 #endif
+
+#ifdef __SWITCH__
+	Switch_IN_Frame();
+#endif
+
 	if( clgame.dllFuncs.pfnLookEvent )
 	{
 		int dx, dy;
