@@ -32,7 +32,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 
 ifdef GAME
-	APP_TITLE = $GAME (Xash3D)
+	APP_TITLE = $(GAME) (Xash3D)
 else
 	APP_TITLE = Xash3D
 endif
