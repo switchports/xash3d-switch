@@ -50,6 +50,7 @@ GNU General Public License for more details.
 
 #ifdef __SWITCH__
 #include <switch.h>
+#include "platform/switch/savetime_switch.h"
 
 static AppletHookCookie applet_hook_cookie;
 
@@ -1236,6 +1237,9 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 
 	IN_Init();
 	Key_Init();
+#ifdef __SWITCH__
+	SaveTime_Init();
+#endif
 }
 
 void Host_FreeCommon( void )
@@ -1244,6 +1248,10 @@ void Host_FreeCommon( void )
 	Sound_Shutdown();
 	Netchan_Shutdown();
 	FS_Shutdown();
+
+#ifdef __SWITCH__
+	SaveTime_Shutdown();
+#endif
 
 	Mem_FreePool( &host.mempool );
 }
