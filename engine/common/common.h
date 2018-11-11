@@ -71,6 +71,11 @@ extern "C" {
 #define MAX_STRING		256	// generic string
 #define MAX_INFO_STRING	256	// infostrings are transmitted across network
 #define MAX_SYSPATH		PATH_MAX	// system filepath
+#ifdef __SWITCH__
+#define MAX_FILE_BUF 1024 * 256
+#else
+#define MAX_FILE_BUF MAX_SYSPATH
+#endif
 #define MAX_MODS		512	// environment games that engine can keep visible
 #define BIT( n )		(1U << ( n ))
 
