@@ -23,9 +23,6 @@ GNU General Public License for more details.
 #include "beamdef.h"
 #include "particledef.h"
 #include "entity_types.h"
-#ifdef __SWITCH__
-#include <switch.h>
-#endif
 
 #define IsLiquidContents( cnt )	( cnt == CONTENTS_WATER || cnt == CONTENTS_SLIME || cnt == CONTENTS_LAVA )
 
@@ -1242,11 +1239,6 @@ R_BeginFrame
 */
 void R_BeginFrame( qboolean clearScene )
 {
-#ifdef __SWITCH__
-	if(!appletMainLoop())
-    	return;
-	Switch_CheckResolution();
-#endif
 	glConfig.softwareGammaUpdate = false;	// in case of possible fails
 
 	if(( gl_clear->integer || gl_overview->integer ) && clearScene && cls.state != ca_cinematic )

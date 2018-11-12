@@ -312,6 +312,11 @@ void Host_FrameLoop()
 	// main window message loop
 	while( !host.crashed && !host.shutdown_issued )
 	{
+#ifdef __SWITCH__
+		if(!appletMainLoop())
+			return;
+		Switch_CheckResolution();
+#endif
 		Host_RunFrame();
 	}
 #endif
@@ -1171,7 +1176,9 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	else
 		Sys_Error( "Changing working directory to %s failed.\n", host.rootdir );
 
+#ifndef __SWITCH__
 	Sys_InitLog();
+#endif
 
 	// set default gamedir
 	if( progname[0] == '#' ) progname++;
@@ -1265,10 +1272,12 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 #ifdef __SWITCH__
 	appletLockExit();
 	appletHook(&applet_hook_cookie, on_applet_hook, NULL);
-	socketInitializeDefault();
-	s_nxlinkSock = nxlinkStdio();
-	if (s_nxlinkSock == -1) {
-		socketExit();
+
+	if (!R_FAILED(socketInitializeDefault())) {
+		s_nxlinkSock = nxlinkStdio();
+		if (s_nxlinkSock == -1) {
+			socketExit();
+		}
 	}
 
 	extern int switch_installdll_mainui( void );
@@ -1433,6 +1442,18 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 
 	Host_FrameLoop();
 
+#ifdef __SWITCH__
+	Host_Shutdown_Switch();
+
+    if (s_nxlinkSock >= 0)
+    {
+        close(s_nxlinkSock);
+        socketExit();
+        s_nxlinkSock = -1;
+	}
+	appletUnlockExit();
+#endif
+
 	// never reached
 	return 0;
 }
@@ -1442,11 +1463,22 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 Host_Shutdown
 =================
 */
+#ifdef __SWITCH__
 void EXPORT Host_Shutdown( void )
 {
 	if( host.shutdown_issued ) return;
 	host.shutdown_issued = true;
+}
 
+void Host_Shutdown_Switch( void )
+#else
+void EXPORT Host_Shutdown( void )
+#endif
+{
+#ifndef __SWITCH__
+	if( host.shutdown_issued ) return;
+	host.shutdown_issued = true;
+#endif
 
 	switch( host.state )
 	{
@@ -1489,17 +1521,9 @@ void EXPORT Host_Shutdown( void )
 	Con_ClearAutoComplete();
 	Cmd_Shutdown();
 	Host_FreeCommon();
+#ifndef __SWITCH__
 	Sys_DestroyConsole();
 	Sys_CloseLog();
 	Sys_RestoreCrashHandler();
-	
-	#ifdef __SWITCH__
-    if (s_nxlinkSock >= 0)
-    {
-        close(s_nxlinkSock);
-        socketExit();
-        s_nxlinkSock = -1;
-	}
-	appletUnlockExit();
-	#endif
+#endif
 }

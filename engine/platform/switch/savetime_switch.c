@@ -64,8 +64,6 @@ void SaveTime_Shutdown( void )
     filetimes_t *current = filetimes;
     filetimes_t *next;
 
-    free(current->data);
-
     while (current->next != NULL) {
         next = current->next;
         free(current->data);
@@ -73,7 +71,8 @@ void SaveTime_Shutdown( void )
         current = next;
     }
 
-    free(filetimes);
+    free(current->data);
+    free(current);
 }
 
 void SaveTime_Save( void )

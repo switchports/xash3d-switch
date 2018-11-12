@@ -780,9 +780,11 @@ void Sys_Quit( void )
 {
 	MsgDev( D_INFO, "Shutting down...\n" );
 	Host_Shutdown();
+#ifndef __SWITCH__
 	if( host.crashed )
 		exit( 127 );
 	exit( error_on_exit );
+#endif
 }
 
 /*

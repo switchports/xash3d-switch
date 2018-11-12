@@ -39,7 +39,7 @@ extern "C" {
 	#endif
 #endif
 
-#ifndef XASH_SDL
+#if !defined(XASH_SDL) && !defined(__SWITCH__)
 
 #if XASH_TIMER == TIMER_SDL || XASH_VIDEO == VIDEO_SDL || XASH_SOUND == SOUND_SDL || XASH_INPUT == INPUT_SDL
 #error "SDL backends without XASH_SDL not allowed"
@@ -764,6 +764,9 @@ int Q_buildnum_compat( void );
 // host.c
 //
 void EXPORT Host_Shutdown( void );
+#ifdef __SWITCH__
+void Host_Shutdown_Switch( void );
+#endif
 void Host_SetServerState( int state );
 int Host_ServerState( void );
 int Host_CompareFileTime( int ft1, int ft2 );
@@ -1112,6 +1115,10 @@ byte TextureToGamma( byte b );
 
 #ifdef __HAIKU__
 #include <FindDirectory.h>
+#endif
+
+#ifdef __SWITCH__
+void Switch_CheckResolution( void );
 #endif
 
 #ifdef __cplusplus

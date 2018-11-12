@@ -13,7 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#ifdef XASH_SDL
+#if defined(XASH_SDL) || defined(__SWITCH__)
 #include <SDL.h>
 
 #include "common.h"
