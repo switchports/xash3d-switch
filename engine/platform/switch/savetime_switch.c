@@ -107,7 +107,7 @@ void SaveTime_SetSaveFiletime( const char *name )
 {
     struct FileTime* filetime = malloc(sizeof(struct FileTime));
     filetime->time = (int)time(NULL);
-    strcpy(filetime->name, name);
+    strncpy(filetime->name, name, SAVE_NAME_LEN);
 
     if (filetimes == NULL) {
         filetimes = malloc(sizeof(struct FILETIMES));
@@ -116,7 +116,7 @@ void SaveTime_SetSaveFiletime( const char *name )
     } else {
         filetimes_t *current = filetimes;
 
-        if (strcmp( name, current->data->name ) == 0) {
+        if (strncmp( name, current->data->name, SAVE_NAME_LEN ) == 0) {
             free(current->data);
             current->data = filetime;
             SaveTime_Save();
@@ -126,7 +126,7 @@ void SaveTime_SetSaveFiletime( const char *name )
         while (current->next != NULL) {
             current = current->next;
 
-            if (strcmp( name, current->data->name ) == 0) {
+            if (strncmp( name, current->data->name, SAVE_NAME_LEN ) == 0) {
                 free(current->data);
                 current->data = filetime;
                 SaveTime_Save();
@@ -148,7 +148,7 @@ int SaveTime_GetSaveFiletime( const char *name )
         filetimes_t *filetime = filetimes;
 
         while (filetime != NULL) {
-            if (strcmp( name, filetime->data->name ) == 0) {
+            if (strncmp( name, filetime->data->name, SAVE_NAME_LEN ) == 0) {
                 return filetime->data->time;
             }
 

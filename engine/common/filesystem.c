@@ -2165,8 +2165,8 @@ qboolean FS_SysFileExists( const char *path, qboolean caseinsensitive )
 	FsFile file;
 
 	char switch_path[MAX_SYSPATH];
-	strcpy(switch_path, SWITCH_FS_PREFIX);
-	strcat(switch_path, path);
+	strncpy(switch_path, SWITCH_FS_PREFIX, MAX_SYSPATH);
+	strncat(switch_path, path, MAX_SYSPATH);
 
 	if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FS_OPEN_READ, &file))) {
 		fsFileClose(&file);
@@ -2176,26 +2176,13 @@ qboolean FS_SysFileExists( const char *path, qboolean caseinsensitive )
 	if ( caseinsensitive ) {
 		const char *fpath = FS_FixFileCase( path );
 
-		strcpy(switch_path, SWITCH_FS_PREFIX);
-		strcat(switch_path, fpath);
+		strncpy(switch_path, SWITCH_FS_PREFIX, MAX_SYSPATH);
+		strncat(switch_path, fpath, MAX_SYSPATH);
 
 		if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FS_OPEN_READ, &file))) {
 			fsFileClose(&file);
 			return true;
 		}
-	}
-
-	return false;
-#elif defined(__SWITCH__)
-	FsDir dir;
-
-	char switch_path[MAX_SYSPATH];
-	strcpy(switch_path, SWITCH_FS_PREFIX);
-	strcat(switch_path, path);
-
-	if (R_SUCCEEDED(fsFsOpenDirectory(fs, switch_path, 0, &dir))) {
-		fsDirClose(&file);
-		return true;
 	}
 
 	return false;
