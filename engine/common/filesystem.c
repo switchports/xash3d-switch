@@ -1976,6 +1976,10 @@ void FS_Shutdown( void )
 
 	Q_memset( &SI, 0, sizeof( sysinfo_t ));
 
+#ifdef __SWITCH__
+	fsFsClose(fs);
+#endif
+
 	FS_ClearSearchPath(); // release all wad files too
 	Mem_FreePool( &fs_mempool );
 }
