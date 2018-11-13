@@ -511,7 +511,11 @@ qboolean VID_ScreenShot( const char *filename, int shot_type )
 
 	// get screen frame
 	pglPixelStorei(GL_PACK_ALIGNMENT, 1);	// PANDORA, just in case
+#ifdef __SWITCH__
+	pglReadPixels( 0, 1080 - r_shot->height, r_shot->width, r_shot->height, GL_RGBA, GL_UNSIGNED_BYTE, r_shot->buffer );
+#else
 	pglReadPixels( 0, 0, r_shot->width, r_shot->height, GL_RGBA, GL_UNSIGNED_BYTE, r_shot->buffer );
+#endif
 	switch( shot_type )
 	{
 	case VID_SCREENSHOT:
