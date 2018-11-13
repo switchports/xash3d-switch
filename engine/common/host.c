@@ -49,16 +49,23 @@ GNU General Public License for more details.
 #endif
 
 #ifdef __SWITCH__
+#include "client.h"
 #include <switch.h>
 #include "platform/switch/savetime_switch.h"
 
 static AppletHookCookie applet_hook_cookie;
 
 static void on_applet_hook(AppletHookType hook, void* param) {
-   if(hook == AppletHookType_OnExitRequest) {
-      printf("Got AppletHook OnExitRequest, exiting.\n");
-      Sys_Quit();
-   }
+	switch(hook) {
+		case AppletHookType_OnFocusState:
+			UI_SetActiveMenu( true );
+			break;
+		case AppletHookType_OnExitRequest:
+			Sys_Quit();
+			break;
+		default:
+			return;
+	}
 }
 
 static int s_nxlinkSock = -1;
@@ -1451,7 +1458,9 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
         socketExit();
         s_nxlinkSock = -1;
 	}
+	appletUnhook(&applet_hook_cookie);
 	appletUnlockExit();
+	appletExit();
 #endif
 
 	// never reached
