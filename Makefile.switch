@@ -37,6 +37,7 @@ else
 	APP_TITLE = Xash3D
 endif
 
+APP_VERSION = 0.2.0
 
 APP_AUTHOR = FWGS, fgsfds, Mats
 
