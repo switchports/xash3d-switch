@@ -51,6 +51,7 @@ GNU General Public License for more details.
 #ifdef __SWITCH__
 #include "client.h"
 #include <switch.h>
+#include <SDL.h>
 #include "platform/switch/savetime_switch.h"
 
 static AppletHookCookie applet_hook_cookie;
@@ -1451,6 +1452,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 
 #ifdef __SWITCH__
 	Host_Shutdown_Switch();
+	SDL_Quit();
 
     if (s_nxlinkSock >= 0)
     {
@@ -1460,7 +1462,6 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	}
 	appletUnhook(&applet_hook_cookie);
 	appletUnlockExit();
-	appletExit();
 #endif
 
 	// never reached
