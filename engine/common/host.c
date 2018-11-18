@@ -54,6 +54,8 @@ GNU General Public License for more details.
 #include <SDL.h>
 #include "platform/switch/savetime_switch.h"
 
+#define NRO_PATH "/switch/"
+
 static AppletHookCookie applet_hook_cookie;
 
 static void on_applet_hook(AppletHookType hook, void* param) {
@@ -363,7 +365,34 @@ void Host_NewInstance( const char *name, const char *finalmsg )
 
 	host.change_game = true;
 	Q_strncpy( host.finalmsg, finalmsg, sizeof( host.finalmsg ));
+#ifdef __SWITCH__
+	// TODO: A much better flexible solution
+	char game[MAX_SYSPATH];
+
+	if (strncmp(name, "gearbox", MAX_SYSPATH) == 0) {
+		strncpy(game, "half-life-opposing-force-xash3d.nro", MAX_SYSPATH);
+	} else if (strncmp(name, "bshift", MAX_SYSPATH) == 0) {
+		strncpy(game, "half-life-blue-shift-xash3d.nro", MAX_SYSPATH);
+	} else {
+		strncpy(game, "half-life-xash3d.nro", MAX_SYSPATH);
+	}
+
+	char path[MAX_SYSPATH];
+	strncpy(path, NRO_PATH, MAX_SYSPATH);
+	strncat(path, game, MAX_SYSPATH);
+
+	struct stat info;
+	if(stat(path, &info) == 0) {
+		char *arguments = (char *)malloc(MAX_SYSPATH);
+
+		sprintf(arguments, "-game %s", name);
+
+		envSetNextLoad(path, "");
+		Sys_Quit();
+	}
+#else
 	pChangeGame( name ); // call from hl.exe
+#endif
 }
 
 /*
