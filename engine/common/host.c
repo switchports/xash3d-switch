@@ -54,7 +54,8 @@ GNU General Public License for more details.
 #include <SDL.h>
 #include "platform/switch/savetime_switch.h"
 
-#define NRO_PATH "/switch/"
+int g_argc;
+char** g_argv;
 
 static AppletHookCookie applet_hook_cookie;
 
@@ -366,8 +367,17 @@ void Host_NewInstance( const char *name, const char *finalmsg )
 	host.change_game = true;
 	Q_strncpy( host.finalmsg, finalmsg, sizeof( host.finalmsg ));
 #ifdef __SWITCH__
-	// TODO: A much better flexible solution
 	char game[MAX_SYSPATH];
+	char nro_path[MAX_SYSPATH];
+	nro_path[0] = "\0";
+
+	char *nro = g_argv[0];
+
+	char *pos = strrchr(nro, '/');
+	*pos = '\0';
+
+	strncpy(nro_path, nro, MAX_SYSPATH);
+	strncat(nro_path, "/", MAX_SYSPATH);
 
 	if (strncmp(name, "gearbox", MAX_SYSPATH) == 0) {
 		strncpy(game, "half-life-opposing-force-xash3d.nro", MAX_SYSPATH);
@@ -378,16 +388,18 @@ void Host_NewInstance( const char *name, const char *finalmsg )
 	}
 
 	char path[MAX_SYSPATH];
-	strncpy(path, NRO_PATH, MAX_SYSPATH);
+	strncpy(path, nro_path, MAX_SYSPATH);
 	strncat(path, game, MAX_SYSPATH);
 
 	struct stat info;
 	if(stat(path, &info) == 0) {
 		char *arguments = (char *)malloc(MAX_SYSPATH);
 
-		sprintf(arguments, "-game %s", name);
+		sprintf(arguments, "\"%s\" \"-game\" \"%s\"", path, name);
 
-		envSetNextLoad(path, "");
+		Msg("Switching game to: %s\n", name);
+
+		envSetNextLoad(path, arguments);
 		Sys_Quit();
 	}
 #else
@@ -1041,6 +1053,11 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	// e.g. xash.exe +game xash -game xash
 	// so we clear all cmd_args, but leave dbg states as well
 	Sys_ParseCommandLine( argc, argv );
+
+#ifdef __SWITCH__
+	g_argc = argc;
+	g_argv = argv;
+#endif
 
 	// to be accessed later
 	if( ( host.daemonized = Sys_CheckParm( "-daemonize" ) ) )
