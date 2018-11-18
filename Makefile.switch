@@ -59,6 +59,10 @@ CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DXASH_SDL -DSINGLE_BINARY -DXASHSDL_MAIN -DXASH_NO_ASYNC_NS_RESOLVE -DXASH_INTERNAL_GAMELIBS -DXASH_ALLOW_SAVERESTORE_OFFSETS -isystem $(DEVKITPRO)/portlibs/switch/include/SDL2
 
+ifdef GAME_DIR
+	CFLAGS += -DXASH_GAMEDIR=\"$(GAME_DIR)\"
+endif
+
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
