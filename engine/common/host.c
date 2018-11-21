@@ -73,6 +73,19 @@ static void on_applet_hook(AppletHookType hook, void* param) {
 }
 
 static int s_nxlinkSock = -1;
+
+static char nro_paths[][MAX_SYSPATH] = { "/switch", "/switch/xash3d" };
+
+static void change_game_switch(const char* name, char* path) {
+	char *arguments = (char *)malloc(MAX_SYSPATH);
+
+	snprintf(arguments, MAX_SYSPATH, "\"%.128s\" \"-game\" \"%.64s\"", path, name);
+
+	Msg("Switching game to: %s\n", name);
+
+	envSetNextLoad(path, arguments);
+	Sys_Quit();
+}
 #endif
 
 typedef void (*pfnChangeGame)( const char *progname );
@@ -367,40 +380,43 @@ void Host_NewInstance( const char *name, const char *finalmsg )
 	host.change_game = true;
 	Q_strncpy( host.finalmsg, finalmsg, sizeof( host.finalmsg ));
 #ifdef __SWITCH__
-	char game[MAX_SYSPATH];
-	char nro_path[MAX_SYSPATH];
-	nro_path[0] = "\0";
+	char curr_nro_path[MAX_SYSPATH];
+	curr_nro_path[0] = "\0";
 
 	char *nro = g_argv[0];
 
 	char *pos = strrchr(nro, '/');
 	*pos = '\0';
 
-	strncpy(nro_path, nro, MAX_SYSPATH);
-	strncat(nro_path, "/", MAX_SYSPATH);
+	strncpy(curr_nro_path, nro, MAX_SYSPATH - 1);
 
-	if (strncmp(name, "gearbox", MAX_SYSPATH) == 0) {
-		strncpy(game, "half-life-opposing-force-xash3d.nro", MAX_SYSPATH);
-	} else if (strncmp(name, "bshift", MAX_SYSPATH) == 0) {
-		strncpy(game, "half-life-blue-shift-xash3d.nro", MAX_SYSPATH);
-	} else {
-		strncpy(game, "half-life-xash3d.nro", MAX_SYSPATH);
-	}
+	char game[MAX_SYSPATH];
+	strncpy(game, name, sizeof(game) - 1);
 
-	char path[MAX_SYSPATH];
-	strncpy(path, nro_path, MAX_SYSPATH);
-	strncat(path, game, MAX_SYSPATH);
+	for( int a = 0; a < 2; a++)
+	{
+		char path[MAX_SYSPATH];
+		snprintf(path, sizeof(path) - 1, "%.128s/xash3d-%.64s.nro", curr_nro_path, game);
 
-	struct stat info;
-	if(stat(path, &info) == 0) {
-		char *arguments = (char *)malloc(MAX_SYSPATH);
+		struct stat info;
+		if(stat(path, &info) == 0) {
+			return change_game_switch(name, path);
+		}
 
-		sprintf(arguments, "\"%s\" \"-game\" \"%s\"", path, name);
+		size_t i = 0;
 
-		Msg("Switching game to: %s\n", name);
+		for( i = 0; i < sizeof(nro_paths) / sizeof(nro_paths[0]); i++)
+		{
+			path[0] = "\0";
+			snprintf(path, sizeof(path), "%.128s/xash3d-%.64s.nro", nro_paths[i], game);
 
-		envSetNextLoad(path, arguments);
-		Sys_Quit();
+			if(stat(path, &info) == 0) {
+				return change_game_switch(name, path);
+			}
+		}
+
+		// retry again with valve as the nro / hlsdk used
+		strncpy(game, "valve", sizeof(game) - 1);
 	}
 #else
 	pChangeGame( name ); // call from hl.exe
@@ -1056,7 +1072,7 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 
 #ifdef __SWITCH__
 	g_argc = argc;
-	g_argv = argv;
+	g_argv = (char **)argv;
 #endif
 
 	// to be accessed later
