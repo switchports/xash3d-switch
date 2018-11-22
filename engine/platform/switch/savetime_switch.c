@@ -61,6 +61,8 @@ void SaveTime_Init( void )
 
 void SaveTime_Shutdown( void )
 {
+    if(!filetimes) return;
+
     filetimes_t *current = filetimes;
     filetimes_t *next;
 
