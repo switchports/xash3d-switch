@@ -57,21 +57,6 @@ GNU General Public License for more details.
 int g_argc;
 char** g_argv;
 
-static AppletHookCookie applet_hook_cookie;
-
-static void on_applet_hook(AppletHookType hook, void* param) {
-	switch(hook) {
-		case AppletHookType_OnFocusState:
-			UI_SetActiveMenu( true );
-			break;
-		case AppletHookType_OnExitRequest:
-			Sys_Quit();
-			break;
-		default:
-			return;
-	}
-}
-
 static int s_nxlinkSock = -1;
 
 static char nro_paths[][MAX_SYSPATH] = { "/switch", "/switch/xash3d" };
@@ -84,7 +69,7 @@ static void change_game_switch(const char* name, char* path) {
 	Msg("Switching game to: %s\n", name);
 
 	envSetNextLoad(path, arguments);
-	Sys_Quit();
+	Host_Shutdown();
 }
 #endif
 
@@ -1341,7 +1326,6 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 {
 #ifdef __SWITCH__
 	appletLockExit();
-	appletHook(&applet_hook_cookie, on_applet_hook, NULL);
 
 	if (!R_FAILED(socketInitializeDefault())) {
 		s_nxlinkSock = nxlinkStdio();
@@ -1522,7 +1506,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
         socketExit();
         s_nxlinkSock = -1;
 	}
-	appletUnhook(&applet_hook_cookie);
+	
 	appletUnlockExit();
 #endif
 
