@@ -54,7 +54,7 @@ EXEFS_SRC	:=	exefs_src
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
+CFLAGS	:=	-g -Wall -O3 -ftree-vectorize -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DXASH_SDL -DSINGLE_BINARY -DXASHSDL_MAIN -DXASH_NO_ASYNC_NS_RESOLVE -DXASH_INTERNAL_GAMELIBS -DXASH_ALLOW_SAVERESTORE_OFFSETS -isystem $(DEVKITPRO)/portlibs/switch/include/SDL2
