@@ -1993,16 +1993,12 @@ Internal function used to determine filetime
 */
 static int FS_SysFileTime( const char *filename )
 {
-#ifdef __SWITCH__
-		return 0;// would be 0 anyways https://github.com/switchbrew/libnx/issues/204
-#else
 	struct stat buf;
 
 	if( stat( filename, &buf ) == -1 )
 		return -1;
 
 	return buf.st_mtime;
-#endif
 }
 
 /*

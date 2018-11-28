@@ -20,10 +20,6 @@ GNU General Public License for more details.
 #include "render_api.h"	// decallist_t
 #include "sound.h"		// S_GetDynamicSounds
 
-#ifdef __SWITCH__
-#include "platform/switch/savetime_switch.h"
-#endif
-
 /*
 ==============================================================================
 SAVE FILE
@@ -2057,10 +2053,6 @@ int SV_SaveGameSlot( const char *pSaveName, const char *pSaveComment )
 	FS_Close( pFile );
 	SV_SaveFinish( pSaveData );
 
-#ifdef __SWITCH__
-	SaveTime_SetSaveFiletime( name );
-#endif
-
 	return 1;
 }
 
@@ -2289,11 +2281,7 @@ const char *SV_GetLatestSave( void )
 
 	for( i = 0; i < f->numfilenames; i++ )
 	{
-#ifdef __SWITCH__
-		ft = SaveTime_GetSaveFiletime( f->filenames[i] );
-#else
 		ft = FS_FileTime( f->filenames[i], true );
-#endif
 
 		// found a match?
 		if( ft > 0 )
@@ -2472,11 +2460,7 @@ qboolean SV_GetComment( const char *savename, char *comment )
 		const struct tm	*file_tm;
 		string		timestring;
 	
-#ifdef __SWITCH__
-		fileTime = SaveTime_GetSaveFiletime( savename );
-#else
 		fileTime = FS_FileTime( savename, true );
-#endif
 		file_tm = localtime( &fileTime );
 
 		// split comment to sections

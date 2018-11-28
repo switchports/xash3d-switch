@@ -52,7 +52,6 @@ GNU General Public License for more details.
 #include "client.h"
 #include <switch.h>
 #include <SDL.h>
-#include "platform/switch/savetime_switch.h"
 
 int g_argc;
 char** g_argv;
@@ -1299,9 +1298,6 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 
 	IN_Init();
 	Key_Init();
-#ifdef __SWITCH__
-	SaveTime_Init();
-#endif
 }
 
 void Host_FreeCommon( void )
@@ -1310,10 +1306,6 @@ void Host_FreeCommon( void )
 	Sound_Shutdown();
 	Netchan_Shutdown();
 	FS_Shutdown();
-
-#ifdef __SWITCH__
-	SaveTime_Shutdown();
-#endif
 
 	Mem_FreePool( &host.mempool );
 }
@@ -1506,7 +1498,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
         socketExit();
         s_nxlinkSock = -1;
 	}
-	
+
 	appletUnlockExit();
 #endif
 
