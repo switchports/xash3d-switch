@@ -50,6 +50,7 @@ GNU General Public License for more details.
 
 #ifdef __SWITCH__
 #include "client.h"
+#include "platform/switch/overclocking_switch.h"
 #include <switch.h>
 #include <SDL.h>
 
@@ -1401,6 +1402,10 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	Android_Init();
 #endif
 
+#ifdef __SWITCH__
+	Switch_OC_Init();
+#endif
+
 	HTTP_Init();
 
 	ID_Init();
@@ -1481,6 +1486,10 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	SCR_CheckStartupVids();	// must be last
 #ifdef XASH_SDL
 	SDL_StopTextInput(); // disable text input event. Enable this in chat/console?
+#endif
+
+#ifdef __SWITCH__
+	Switch_OC_Update();
 #endif
 
 	if( host.state == HOST_INIT )
@@ -1573,5 +1582,6 @@ void EXPORT Host_Shutdown( void )
 	Sys_DestroyConsole();
 	Sys_CloseLog();
 	Sys_RestoreCrashHandler();
+	Switch_OC_Free();
 #endif
 }
