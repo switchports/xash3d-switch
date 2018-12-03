@@ -35,6 +35,14 @@ static buttonmapping_t btn_map[15] =
 
 uint64_t btn_state;
 uint64_t old_btn_state;
+qboolean touch_down;
+
+typedef struct touchfinger_s
+{
+	float x, y, dx, dy;
+} touchfinger_t;
+
+touchfinger_t fingers[10];
 
 #define SWITCH_JOYSTICK_DEADZONE 1024
 
@@ -58,6 +66,33 @@ static void RescaleAnalog( int *x, int *y, int dead )
 	{
 		*x = 0;
 		*y = 0;
+	}
+}
+
+void Switch_IN_HandleTouch( void )
+{
+	touchPosition touch;
+
+	u32 touch_count = hidTouchCount();
+
+	if(touch_count > 0) {
+		hidTouchRead(&touch, 0);
+		x = touch.px / scr_width->value;
+		y = touch.py / scr_height->value;
+		dx = touch.dx / scr_width->value;
+		dy = touch.dy / scr_height->value;
+
+		if (!touch_down) {
+			IN_TouchEvent( event_down, 0, x, y, dx, dy );
+			touch_down = true;
+		} else {
+			IN_TouchEvent( event_motion, 0, x, y, dx, dy );
+		}
+	} else {
+		if (touch_down) {
+			IN_TouchEvent( event_up, 0, x, y, dx, dy );
+			touch_down = false;
+		}
 	}
 }
 
@@ -93,6 +128,8 @@ void Switch_IN_Frame( void )
 
 	Joy_AxisMotionEvent( 0, 2, pos_right.dx );
 	Joy_AxisMotionEvent( 0, 3, -pos_right.dy );
+
+	Switch_IN_HandleTouch();
 }
 
 #endif
