@@ -37,12 +37,7 @@ uint64_t btn_state;
 uint64_t old_btn_state;
 qboolean touch_down;
 
-typedef struct touchfinger_s
-{
-	float x, y, dx, dy;
-} touchfinger_t;
-
-touchfinger_t fingers[10];
+float x, y, dx, dy;
 
 #define SWITCH_JOYSTICK_DEADZONE 1024
 
