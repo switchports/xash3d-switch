@@ -61,6 +61,14 @@ static int s_nxlinkSock = -1;
 
 static char nro_paths[][MAX_SYSPATH] = { "/switch", "/switch/xash3d" };
 
+static AppletHookCookie applet_hook_cookie;
+
+static void on_applet_hook(AppletHookType hook, void *param) {
+	if(hook == AppletHookType_OnPerformanceMode) {
+		Switch_OC_Update();
+	}
+}
+
 static void change_game_switch(const char* name, char* path) {
 	char *arguments = (char *)malloc(MAX_SYSPATH);
 
@@ -1582,6 +1590,6 @@ void EXPORT Host_Shutdown( void )
 	Sys_DestroyConsole();
 	Sys_CloseLog();
 	Sys_RestoreCrashHandler();
-	Switch_OC_Free();
+	Switch_OC_Shutdown();
 #endif
 }

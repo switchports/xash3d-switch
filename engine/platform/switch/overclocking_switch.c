@@ -6,6 +6,7 @@ convar_t *switch_overclock;
 
 void Switch_OC_Init( void )
 {
+    pcvInitialize();
     switch_overclock = Cvar_Get( "switch_overclock", "0", FCVAR_ARCHIVE, "switch overclock" );
     Cmd_AddCommand( "switch_overclock_update", (xcommand_t)Switch_OC_Update, "Apply the current overclock");
 }
@@ -36,7 +37,8 @@ void Switch_OC_Update( void )
     pcvSetClockRate(PcvModule_Cpu, overclock.clock);
 }
 
-void Switch_OC_Free( void )
+void Switch_OC_Shutdown( void )
 {
     pcvSetClockRate(PcvModule_Cpu, SWITCH_CPU_STOCK_CLOCK);
+    pcvExit();
 }

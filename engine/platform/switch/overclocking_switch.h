@@ -23,6 +23,6 @@ void Switch_OC_Init( void );
 
 void Switch_OC_Update( void );
 
-void Switch_OC_Free( void );
+void Switch_OC_Shutdown( void );
 
 #endif
