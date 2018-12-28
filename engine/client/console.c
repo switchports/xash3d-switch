@@ -21,6 +21,11 @@ GNU General Public License for more details.
 #include "qfont.h"
 #include "server.h" // Log_Printf( , ... )
 
+#ifdef __SWITCH__
+#include <switch.h>
+#include "platform/switch/in_switch.h"
+#endif
+
 convar_t	*con_notifytime;
 convar_t	*scr_conspeed;
 convar_t	*con_fontsize;
@@ -262,7 +267,11 @@ Con_ToggleConsole_f
 */
 void Con_ToggleConsole_f( void )
 {
+#ifdef __SWITCH__
+	if( !Switch_IN_ConsoleEnabled() ) return;
+#else
 	if( !host.developer ) return;	// disabled
+#endif
 
 	if( UI_CreditsActive( )) return; // disabled by final credits
 
@@ -1317,6 +1326,30 @@ Handles history and console scrollback
 */
 void Key_Console( int key )
 {
+#ifdef __SWITCH__
+	// trigger software keyboard
+	if ( key == K_SPACE )
+	{
+		Result rc=0;
+		char con_input[32] = {0};
+
+		SwkbdConfig kbd;
+    	rc = swkbdCreate(&kbd, 0);
+
+		if (R_SUCCEEDED(rc)) {
+			swkbdConfigMakePresetDefault(&kbd);
+
+			rc = swkbdShow(&kbd, con_input, sizeof(con_input));
+
+			if (R_SUCCEEDED(rc)) {
+				printf("exec: %s\n", con_input);
+				Cbuf_AddText( con_input );
+				Cbuf_AddText( "\n" );
+			}
+			swkbdClose(&kbd);
+		}
+	}
+#else
 	// ctrl-L clears screen
 	if( key == 'l' && Key_IsDown( K_CTRL ))
 	{
@@ -1436,6 +1469,7 @@ void Key_Console( int key )
 
 	// pass to the normal editline routine
 	Field_KeyDownEvent( &con.input, key );
+#endif
 }
 
 /*
@@ -1943,7 +1977,11 @@ Scroll it up or down
 void Con_RunConsole( void )
 {
 	// decide on the destination height of the console
+#ifdef __SWITCH__
+	if( Switch_IN_ConsoleEnabled() && cls.key_dest == key_console ) 
+#else
 	if( host.developer && cls.key_dest == key_console )
+#endif
 	{
 		if( cls.state == ca_disconnected )
 			con.finalFrac = 1.0f;// full screen

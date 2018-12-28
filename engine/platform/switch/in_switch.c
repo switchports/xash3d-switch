@@ -8,6 +8,8 @@
 #include "in_switch.h"
 #include <switch.h>
 
+convar_t *switch_console;
+
 typedef struct buttonmapping_s
 {
 	HidControllerKeys btn;
@@ -62,6 +64,16 @@ static void RescaleAnalog( int *x, int *y, int dead )
 		*x = 0;
 		*y = 0;
 	}
+}
+
+void Switch_IN_Init( void )
+{
+	switch_console = Cvar_Get( "switch_console", "0", FCVAR_ARCHIVE, "enable switch console override" );
+}
+
+qboolean Switch_IN_ConsoleEnabled( void )
+{
+	return switch_console->value > 0;
 }
 
 void Switch_IN_HandleTouch( void )
