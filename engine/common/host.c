@@ -50,6 +50,7 @@ GNU General Public License for more details.
 
 #ifdef __SWITCH__
 #include "client.h"
+#include "platform/switch/in_switch.h"
 #include "platform/switch/overclocking_switch.h"
 #include <switch.h>
 #include <SDL.h>
@@ -1412,6 +1413,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 
 #ifdef __SWITCH__
 	Switch_OC_Init();
+	Switch_IN_Init();
 #endif
 
 	HTTP_Init();

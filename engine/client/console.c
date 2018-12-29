@@ -21,6 +21,11 @@ GNU General Public License for more details.
 #include "qfont.h"
 #include "server.h" // Log_Printf( , ... )
 
+#ifdef __SWITCH__
+#include <switch.h>
+#include "platform/switch/in_switch.h"
+#endif
+
 convar_t	*con_notifytime;
 convar_t	*scr_conspeed;
 convar_t	*con_fontsize;
@@ -262,13 +267,19 @@ Con_ToggleConsole_f
 */
 void Con_ToggleConsole_f( void )
 {
+#ifdef __SWITCH__
+	if( !Switch_IN_ConsoleEnabled() ) return;
+#else
 	if( !host.developer ) return;	// disabled
+#endif
 
 	if( UI_CreditsActive( )) return; // disabled by final credits
 
+#ifndef __SWITCH__
 	// show console only in game or by special call from menu
 	if( cls.state != ca_active || cls.key_dest == key_menu )
 		return;
+#endif
 
 	Con_ClearTyping();
 	Con_ClearNotify();
@@ -1317,6 +1328,43 @@ Handles history and console scrollback
 */
 void Key_Console( int key )
 {
+#ifdef __SWITCH__
+	// trigger software keyboard
+	if ( key == K_ENTER )
+	{
+		Result rc=0;
+		char con_input[50] = {0};
+
+		SwkbdConfig kbd;
+    	rc = swkbdCreate(&kbd, 0);
+
+		if (R_SUCCEEDED(rc)) {
+			swkbdConfigMakePresetDefault(&kbd);
+
+			rc = swkbdShow(&kbd, con_input, sizeof(con_input));
+
+			if (R_SUCCEEDED(rc)) {
+				Msg( ">%s\n", con_input );
+
+				Cbuf_AddText( con_input );
+				Cbuf_AddText( "\n" );
+				Con_Bottom();
+
+				// copy line to history buffer
+				con.historyLines[con.nextHistoryLine % CON_HISTORY] = con.input;
+				con.nextHistoryLine++;
+				con.historyLine = con.nextHistoryLine;
+
+				if( cls.state == ca_disconnected )
+				{
+					// force an update, because the command may take some time
+					SCR_UpdateScreen ();
+				}
+			}
+			swkbdClose(&kbd);
+		}
+	}
+#else
 	// ctrl-L clears screen
 	if( key == 'l' && Key_IsDown( K_CTRL ))
 	{
@@ -1436,6 +1484,7 @@ void Key_Console( int key )
 
 	// pass to the normal editline routine
 	Field_KeyDownEvent( &con.input, key );
+#endif
 }
 
 /*
@@ -1853,7 +1902,7 @@ void Con_DrawConsole( void )
 	case ca_uninitialized:
 		break;
 	case ca_disconnected:
-		if( cls.key_dest != key_menu && host.developer )
+		if( cls.key_dest != key_menu && (host.developer || Switch_IN_ConsoleEnabled() ))
 		{
 			Con_DrawSolidConsole( con_maxfrac->value, true );
 			Key_SetKeyDest( key_console );
@@ -1943,7 +1992,11 @@ Scroll it up or down
 void Con_RunConsole( void )
 {
 	// decide on the destination height of the console
+#ifdef __SWITCH__
+	if( Switch_IN_ConsoleEnabled() && cls.key_dest == key_console ) 
+#else
 	if( host.developer && cls.key_dest == key_console )
+#endif
 	{
 		if( cls.state == ca_disconnected )
 			con.finalFrac = 1.0f;// full screen
