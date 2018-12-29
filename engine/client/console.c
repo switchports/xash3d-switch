@@ -1344,9 +1344,22 @@ void Key_Console( int key )
 			rc = swkbdShow(&kbd, con_input, sizeof(con_input));
 
 			if (R_SUCCEEDED(rc)) {
+				Msg( ">%s\n", con_input );
+
 				Cbuf_AddText( con_input );
 				Cbuf_AddText( "\n" );
 				Con_Bottom();
+
+				// copy line to history buffer
+				con.historyLines[con.nextHistoryLine % CON_HISTORY] = con.input;
+				con.nextHistoryLine++;
+				con.historyLine = con.nextHistoryLine;
+
+				if( cls.state == ca_disconnected )
+				{
+					// force an update, because the command may take some time
+					SCR_UpdateScreen ();
+				}
 			}
 			swkbdClose(&kbd);
 		}
