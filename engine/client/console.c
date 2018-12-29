@@ -275,9 +275,11 @@ void Con_ToggleConsole_f( void )
 
 	if( UI_CreditsActive( )) return; // disabled by final credits
 
+#ifndef __SWITCH__
 	// show console only in game or by special call from menu
 	if( cls.state != ca_active || cls.key_dest == key_menu )
 		return;
+#endif
 
 	Con_ClearTyping();
 	Con_ClearNotify();
@@ -1328,10 +1330,10 @@ void Key_Console( int key )
 {
 #ifdef __SWITCH__
 	// trigger software keyboard
-	if ( key == K_SPACE )
+	if ( key == K_ENTER )
 	{
 		Result rc=0;
-		char con_input[32] = {0};
+		char con_input[50] = {0};
 
 		SwkbdConfig kbd;
     	rc = swkbdCreate(&kbd, 0);
@@ -1342,9 +1344,9 @@ void Key_Console( int key )
 			rc = swkbdShow(&kbd, con_input, sizeof(con_input));
 
 			if (R_SUCCEEDED(rc)) {
-				printf("exec: %s\n", con_input);
 				Cbuf_AddText( con_input );
 				Cbuf_AddText( "\n" );
+				Con_Bottom();
 			}
 			swkbdClose(&kbd);
 		}
@@ -1887,7 +1889,7 @@ void Con_DrawConsole( void )
 	case ca_uninitialized:
 		break;
 	case ca_disconnected:
-		if( cls.key_dest != key_menu && host.developer )
+		if( cls.key_dest != key_menu && (host.developer || Switch_IN_ConsoleEnabled() ))
 		{
 			Con_DrawSolidConsole( con_maxfrac->value, true );
 			Key_SetKeyDest( key_console );
