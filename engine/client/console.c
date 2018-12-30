@@ -1340,6 +1340,8 @@ void Key_Console( int key )
 
 		if (R_SUCCEEDED(rc)) {
 			swkbdConfigMakePresetDefault(&kbd);
+			swkbdConfigSetInitialText(&kbd, con.input.buffer);
+			swkbdConfigSetOkButtonText(&kbd, "Execute");
 
 			rc = swkbdShow(&kbd, con_input, sizeof(con_input));
 
@@ -1350,10 +1352,14 @@ void Key_Console( int key )
 				Cbuf_AddText( "\n" );
 				Con_Bottom();
 
+				Q_strncpy(con.input.buffer, con_input, MAX_STRING);
+
 				// copy line to history buffer
 				con.historyLines[con.nextHistoryLine % CON_HISTORY] = con.input;
 				con.nextHistoryLine++;
 				con.historyLine = con.nextHistoryLine;
+
+				Con_ClearField( &con.input );
 
 				if( cls.state == ca_disconnected )
 				{
@@ -1363,6 +1369,24 @@ void Key_Console( int key )
 			}
 			swkbdClose(&kbd);
 		}
+	}
+
+	if( key == K_UPARROW )
+	{
+		if( con.nextHistoryLine - con.historyLine < CON_HISTORY && con.historyLine > 0 )
+		{
+			con.historyLine--;
+		}
+		con.input = con.historyLines[con.historyLine % CON_HISTORY];
+		return;
+	}
+
+	if( key == K_DOWNARROW )
+	{
+		if( con.historyLine == con.nextHistoryLine ) return;
+		con.historyLine++;
+		con.input = con.historyLines[con.historyLine % CON_HISTORY];
+		return;
 	}
 #else
 	// ctrl-L clears screen
