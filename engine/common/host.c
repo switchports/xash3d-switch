@@ -1328,6 +1328,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 {
 #ifdef __SWITCH__
 	appletLockExit();
+	appletHook(&applet_hook_cookie, on_applet_hook, NULL);
 
 	if (!R_FAILED(socketInitializeDefault())) {
 		s_nxlinkSock = nxlinkStdio();
@@ -1519,6 +1520,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	}
 
 	appletUnlockExit();
+	appletUnhook(&applet_hook_cookie);
 #endif
 
 	// never reached
