@@ -13,11 +13,21 @@ void Switch_OC_Init( void )
 
 void Switch_OC_Update( void )
 {
-    overclockingspeed_t overclock;
+    overclockingspeed_t overclock = SWITCH_CPU_OVERCLOCKING_SPEEDS[0];
 
     qboolean found;
 
     int overclock_id = switch_overclock->value;
+
+    if(overclock_id == 0) {
+        u32 clock_rate = 0;
+
+        pcvGetClockRate(PcvModule_Cpu, &clock_rate);
+
+        if(clock_rate == SWITCH_CPU_STOCK_CLOCK)
+            return;
+    }
+
     const size_t cpu_overclock_count = sizeof(SWITCH_CPU_OVERCLOCKING_SPEEDS) / sizeof(SWITCH_CPU_OVERCLOCKING_SPEEDS[1]);
 
     for (int i = 0; i < cpu_overclock_count; i++)

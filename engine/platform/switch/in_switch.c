@@ -133,8 +133,8 @@ void Switch_IN_Frame( void )
 
 	RescaleAnalog(&pos_right.dx, &pos_right.dy, SWITCH_JOYSTICK_DEADZONE);
 
-	Joy_AxisMotionEvent( 0, 2, pos_right.dx );
-	Joy_AxisMotionEvent( 0, 3, -pos_right.dy );
+	Joy_AxisMotionEvent( 0, 2, -pos_right.dx );
+	Joy_AxisMotionEvent( 0, 3, pos_right.dy );
 
 	Switch_IN_HandleTouch();
 }

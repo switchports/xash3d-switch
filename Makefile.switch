@@ -45,7 +45,7 @@ TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	glad engine/common engine/common/imagelib engine/common/soundlib engine/common/soundlib/libmpg engine/client engine/client/vgui engine/server engine/platform/switch engine/platform/sdl
 DATA		:=	data
-INCLUDES	:=	include engine engine/platform/sdl engine/common engine/common/imagelib engine/common/soundlib engine/common/stb common engine/server engine/client engine/client/vgui pm_shared .
+INCLUDES	:=	include engine engine/common engine/common/imagelib engine/common/soundlib engine/common/stb common engine/server engine/client engine/client/vgui pm_shared .
 EXEFS_SRC	:=	exefs_src
 #ROMFS	:=	romfs
 
@@ -57,10 +57,14 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O2 -ftree-vectorize -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DXASH_SDL -DSINGLE_BINARY -DXASHSDL_MAIN -DXASH_NO_ASYNC_NS_RESOLVE -DXASH_INTERNAL_GAMELIBS -DXASH_ALLOW_SAVERESTORE_OFFSETS -isystem $(DEVKITPRO)/portlibs/switch/include/SDL2
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DSINGLE_BINARY -DXASH_NO_ASYNC_NS_RESOLVE -DXASH_INTERNAL_GAMELIBS -DXASH_ALLOW_SAVERESTORE_OFFSETS -isystem $(DEVKITPRO)/portlibs/switch/include/SDL2
 
 ifdef GAME_DIR
 	CFLAGS += -DXASH_GAMEDIR=\"$(GAME_DIR)\"
+endif
+
+ifdef DEV
+	CFLAGS += -DDEFAULT_DEV=5
 endif
 
 CXXFLAGS	:= $(CFLAGS) -fno-exceptions
@@ -68,7 +72,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-exceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map),--allow-multiple-definition
 
-LIBS	:= -lSDL2 -lmpg123 -lEGL -lglapi -ldrm_nouveau -lmainui -lclient -lserver -lnx -lm -lstdc++
+LIBS	:= -lmpg123 -lEGL -lglapi -ldrm_nouveau -lmainui -lclient -lserver -lSDL2 -lnx -lm -lstdc++
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
