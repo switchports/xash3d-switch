@@ -67,7 +67,7 @@ ifdef DEV
 	CFLAGS += -DDEFAULT_DEV=5
 endif
 
-CXXFLAGS	:= $(CFLAGS) -fno-exceptions
+CXXFLAGS	:= $(CFLAGS)
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map),--allow-multiple-definition
