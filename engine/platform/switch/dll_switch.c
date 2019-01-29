@@ -59,7 +59,7 @@ void *dlsym( void *handle, const char *symbol )
 	dll_t *d = handle;
 	if( !d->refcnt ) { dll_err = "dlsym(): call dlopen() first"; return NULL; }
 	dllexport_t *f = NULL;
-	for( f = d->exp; f && f->func; f++ )
+	for( f = d->exp; f && f->func && f->name; f++ )
 		if( !Q_strcmp( f->name, symbol ) )
 			break;
 
