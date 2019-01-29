@@ -16,6 +16,12 @@ typedef struct buttonmapping_s
 	int key;
 } buttonmapping_t;
 
+typedef struct touchfinger_s
+{
+	float x, y, dx, dy;
+	qboolean down;
+} touchfinger_t;
+
 static buttonmapping_t btn_map[15] =
 {
 	{ KEY_MINUS, '~' },
@@ -35,11 +41,11 @@ static buttonmapping_t btn_map[15] =
 	{ KEY_Y, 'e' },
 };
 
-uint64_t btn_state;
-uint64_t old_btn_state;
-qboolean touch_down;
 
-float x, y, dx, dy;
+
+static uint64_t btn_state;
+static uint64_t old_btn_state;
+static touchfinger_t touch_finger[10];
 
 #define SWITCH_JOYSTICK_DEADZONE 1024
 
@@ -78,27 +84,51 @@ qboolean Switch_IN_ConsoleEnabled( void )
 
 void Switch_IN_HandleTouch( void )
 {
-	touchPosition touch;
-
 	u32 touch_count = hidTouchCount();
 
-	if(touch_count > 0) {
-		hidTouchRead(&touch, 0);
-		x = touch.px / scr_width->value;
-		y = touch.py / scr_height->value;
-		dx = touch.dx / scr_width->value;
-		dy = touch.dy / scr_height->value;
+	const size_t finger_count = sizeof(touch_finger) / sizeof(touch_finger[1]);
 
-		if (!touch_down) {
-			IN_TouchEvent( event_down, 0, x, y, dx, dy );
-			touch_down = true;
-		} else {
-			IN_TouchEvent( event_motion, 0, x, y, dx, dy );
+	qboolean touched_down_now[finger_count];
+
+	if( touch_count > 0 ) {
+		touchPosition touch;
+
+		for( int i = 0; i < touch_count; i ++ ) {
+			hidTouchRead(&touch, i);
+			if(touch.id >= finger_count)
+				continue;
+
+			touchfinger_t *finger = &touch_finger[touch.id];
+
+			finger->x = touch.px / scr_width->value;
+			finger->y = touch.py / scr_height->value;
+			finger->dx = touch.dx / scr_width->value;
+			finger->dy = touch.dy / scr_height->value;
+
+			touched_down_now[touch.id] = true;
+
+			if (!touch_finger[touch.id].down) {
+				IN_TouchEvent( event_down, touch.id, finger->x, finger->y, finger->dx, finger->dy );
+				finger->down = true;
+			} else {
+				IN_TouchEvent( event_motion, touch.id, finger->x, finger->y, finger->dx, finger->dy );
+			}
+		}
+
+		for( int i = 0; i < finger_count; i ++ ) {
+			if(touch_finger[i].down && !touched_down_now[i]) {
+				touchfinger_t *finger = &touch_finger[i];
+				finger->down = false;
+				IN_TouchEvent( event_up, i, finger->x, finger->y, finger->dx, finger->dy );
+			}
 		}
 	} else {
-		if (touch_down) {
-			IN_TouchEvent( event_up, 0, x, y, dx, dy );
-			touch_down = false;
+		for( int i = 0; i < finger_count; i ++ ) {
+			if(touch_finger[i].down) {
+				touchfinger_t *finger = &touch_finger[i];
+				finger->down = false;
+				IN_TouchEvent( event_up, i, finger->x, finger->y, finger->dx, finger->dy );
+			}
 		}
 	}
 }
