@@ -4,6 +4,36 @@
 
 convar_t *switch_overclock;
 
+void Switch_OC_GetClockRate( u32 *out )
+{
+    if(hosversionBefore(8, 0, 0))
+    {
+        pcvGetClockRate(PcvModule_CpuBus, out);
+    }
+    else
+    {
+        ClkrstSession session = {0};
+        clkrstOpenSession(&session, PcvModuleId_CpuBus, 3);
+        clkrstGetClockRate(&session, out);
+        clkrstCloseSession(&session);
+    }
+}
+
+void Switch_OC_SetClockRate( u32 rate )
+{
+    if(hosversionBefore(8, 0, 0))
+    {
+        pcvSetClockRate(PcvModule_CpuBus, rate);
+    }
+    else
+    {
+        ClkrstSession session = {0};
+        clkrstOpenSession(&session, PcvModuleId_CpuBus, 3);
+        clkrstSetClockRate(&session, rate);
+        clkrstCloseSession(&session);
+    }
+}
+
 void Switch_OC_Init( void )
 {
     pcvInitialize();
@@ -22,7 +52,7 @@ void Switch_OC_Update( void )
     if(overclock_id == 0) {
         u32 clock_rate = 0;
 
-        pcvGetClockRate(PcvModule_Cpu, &clock_rate);
+        Switch_OC_GetClockRate(&clock_rate);
 
         if(clock_rate == SWITCH_CPU_STOCK_CLOCK)
             return;
@@ -44,11 +74,11 @@ void Switch_OC_Update( void )
 
     Msg("Switch: Switching clock speed to %d\n", overclock.clock);
 
-    pcvSetClockRate(PcvModule_Cpu, overclock.clock);
+    Switch_OC_SetClockRate(overclock.clock);
 }
 
 void Switch_OC_Shutdown( void )
 {
-    pcvSetClockRate(PcvModule_Cpu, SWITCH_CPU_STOCK_CLOCK);
+    Switch_OC_SetClockRate(SWITCH_CPU_STOCK_CLOCK);
     pcvExit();
 }
