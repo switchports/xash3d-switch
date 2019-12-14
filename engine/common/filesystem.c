@@ -1833,7 +1833,7 @@ void FS_Init( void )
 	Cmd_AddCommand( "md5", FS_MD5_f, "print md5 of for file" );
 
 #ifdef __SWITCH__
-	fs = fsdevGetDefaultFileSystem();
+	fsdevMountDevice("sdmc", fs);
 #endif
 
 #ifndef _WIN32
