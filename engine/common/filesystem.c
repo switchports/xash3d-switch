@@ -37,14 +37,6 @@ GNU General Public License for more details.
 #include <unistd.h>
 #endif
 
-#ifdef __SWITCH__
-#include <switch.h>
-
-#define SWITCH_FS_PREFIX "/xash3d/"
-
-FsFileSystem *fs;
-#endif
-
 #define FILE_BUFF_SIZE		2048
 #define PAK_LOAD_OK			0
 #define PAK_LOAD_COULDNT_OPEN		1
@@ -1832,10 +1824,6 @@ void FS_Init( void )
 	Cmd_AddCommand( "crc32", FS_Crc32_f, "print crc32 of for file" );
 	Cmd_AddCommand( "md5", FS_MD5_f, "print md5 of for file" );
 
-#ifdef __SWITCH__
-	fsdevMountDevice("sdmc", fs);
-#endif
-
 #ifndef _WIN32
 	if( Sys_CheckParm( "-casesensitive" ) )
 		fs_caseinsensitive = false;
@@ -1975,10 +1963,6 @@ void FS_Shutdown( void )
 		if( SI.games[i] ) Mem_Free( SI.games[i] );
 
 	Q_memset( &SI, 0, sizeof( sysinfo_t ));
-
-#ifdef __SWITCH__
-	fsFsClose(fs);
-#endif
 
 	FS_ClearSearchPath(); // release all wad files too
 	Mem_FreePool( &fs_mempool );
@@ -2161,31 +2145,6 @@ qboolean FS_SysFileExists( const char *path, qboolean caseinsensitive )
 	if( desc < 0 ) return false;
 	close( desc );
 	return true;
-#elif defined(__SWITCH__)
-	FsFile file;
-
-	char switch_path[MAX_SYSPATH];
-	strncpy(switch_path, SWITCH_FS_PREFIX, MAX_SYSPATH);
-	strncat(switch_path, path, MAX_SYSPATH);
-
-	if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FsOpenMode_Read, &file))) {
-		fsFileClose(&file);
-		return true;
-	}
-
-	if ( caseinsensitive ) {
-		const char *fpath = FS_FixFileCase( path );
-
-		strncpy(switch_path, SWITCH_FS_PREFIX, MAX_SYSPATH);
-		strncat(switch_path, fpath, MAX_SYSPATH);
-
-		if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FsOpenMode_Read, &file))) {
-			fsFileClose(&file);
-			return true;
-		}
-	}
-
-	return false;
 #else
 	int ret;
 	struct stat buf;
