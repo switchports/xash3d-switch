@@ -2168,7 +2168,7 @@ qboolean FS_SysFileExists( const char *path, qboolean caseinsensitive )
 	strncpy(switch_path, SWITCH_FS_PREFIX, MAX_SYSPATH);
 	strncat(switch_path, path, MAX_SYSPATH);
 
-	if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FS_OPEN_READ, &file))) {
+	if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FsOpenMode_Read, &file))) {
 		fsFileClose(&file);
 		return true;
 	}
@@ -2179,7 +2179,7 @@ qboolean FS_SysFileExists( const char *path, qboolean caseinsensitive )
 		strncpy(switch_path, SWITCH_FS_PREFIX, MAX_SYSPATH);
 		strncat(switch_path, fpath, MAX_SYSPATH);
 
-		if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FS_OPEN_READ, &file))) {
+		if (R_SUCCEEDED(fsFsOpenFile(fs, switch_path, FsOpenMode_Read, &file))) {
 			fsFileClose(&file);
 			return true;
 		}
